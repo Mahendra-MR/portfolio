@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Ignore resume
-/public/CV_Mahendra.pdf
+# # Ignore resume
+# /public/CV_Mahendra.pdf
