@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,11 +11,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Optional: This metadata is used by Next.js for SEO, titles, etc.
 export const metadata = {
   title: 'Mahendra M R | Portfolio',
-  description: 'Full-stack Developer • Blockchain Enthusiast • MERN Specialist',
+  description: 'Full-stack Developer',
 };
-
 
 export default function RootLayout({
   children,
@@ -25,9 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
