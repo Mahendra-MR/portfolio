@@ -75,7 +75,7 @@ export async function fetchUserRepos(): Promise<GitHubRepo[]> {
 
         return {
           name: repo.name,
-            description: repo.description ?? `🧠 Stack: ${languageString || 'Not available'}`,
+            description: repo.description ?? `Tech Stack: ${languageString || 'Not available'}`,
           html_url: repo.html_url,
           topics: repo.topics ?? [],
         };
