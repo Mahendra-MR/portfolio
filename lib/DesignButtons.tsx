@@ -22,6 +22,23 @@ export function TiltButton() {
   );
 }
 
+export function GitHubButton() {
+  return (
+    <Tilt
+      glareEnable={true}
+      glareMaxOpacity={0.2}
+      scale={1.05}
+      className="w-fit mx-auto"
+    >
+      <Link
+        href="/projects"
+        className="inline-block px-6 py-3 text-white bg-gradient-to-r from-pink-500 to-yellow-500 rounded-lg shadow-lg hover:from-pink-600 hover:to-yellow-600 transition-all duration-300"
+      >
+        Visit Projects
+      </Link>
+    </Tilt>
+  );
+}
 
 export function DownloadButton() {
   return (
@@ -35,7 +52,7 @@ export function DownloadButton() {
         Download PDF
       </span>
 
-      {/* ✅ Mobile: icon only, same style */}
+      {/* ✅ Mobile: icon only */}
       <span className="sm:hidden p-3 flex items-center justify-center">
         <Download className="h-5 w-5" />
       </span>
