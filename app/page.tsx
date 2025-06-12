@@ -2,7 +2,7 @@ import PageWrapper from '@/lib/PageWrapper';
 import AnimatedHeading from '@/lib/AnimatedHeading';
 import SocialLinks from '@/lib/SocialLinks';
 import FullAnimatedBackground from '@/lib/FullAnimatedBackground';
-import { TiltButton, DownloadButton } from '@/lib/DesignButtons'; // ✅ updated import
+import { TiltButton } from '@/lib/DesignButtons'; // ✅ updated import
 
 export default function Home() {
   return (
