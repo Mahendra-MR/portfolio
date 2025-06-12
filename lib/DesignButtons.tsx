@@ -2,6 +2,7 @@
 
 import Tilt from 'react-parallax-tilt';
 import Link from 'next/link';
+import { Download } from 'lucide-react';
 
 export function TiltButton() {
   return (
@@ -21,14 +22,23 @@ export function TiltButton() {
   );
 }
 
+
 export function DownloadButton() {
   return (
     <Link
       href="/CV_Mahendra.pdf"
       download
-      className="fixed bottom-6 right-30 z-50 px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all text-sm font-semibold"
+      className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all"
     >
-      Download PDF
+      {/* ✅ Desktop: show full button */}
+      <span className="hidden sm:inline-block px-5 py-3 text-sm font-semibold">
+        Download PDF
+      </span>
+
+      {/* ✅ Mobile: icon only, same style */}
+      <span className="sm:hidden p-3 flex items-center justify-center">
+        <Download className="h-5 w-5" />
+      </span>
     </Link>
   );
 }
