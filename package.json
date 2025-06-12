@@ -10,9 +10,15 @@
   },
   "dependencies": {
     "@netlify/next": "^1.4.9",
+    "framer-motion": "^12.17.0",
     "next": "15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-parallax-tilt": "^1.7.297",
+    "react-simple-typewriter": "^5.0.1",
+    "react-tsparticles": "^2.12.2",
+    "tsparticles-basic": "^2.12.0",
+    "tsparticles-engine": "^2.12.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
