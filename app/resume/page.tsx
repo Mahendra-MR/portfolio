@@ -100,7 +100,7 @@ export default function ResumePage() {
                   <FadeInSection>
                       <h2 className="text-2xl font-semibold text-blue-400 mb-4">Additional Details</h2>
                       <div className="text-base text-gray-300">
-                          <p><strong>Strengths:</strong> Quick learner, motivated, independent</p>
+                          <p><strong>Strengths:</strong>Highly motivated, ability to learn quickly, capable of working with minimum supervision</p>
                           <p><strong>Languages Known:</strong> English, Kannada, Hindi</p>
                       </div>
                   </FadeInSection>
