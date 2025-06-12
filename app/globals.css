@@ -8,3 +8,11 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
 }
+
+.glass-card {
+  @apply bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md shadow-md;
+}
+
+.section-title {
+  @apply text-xl font-semibold text-blue-400 tracking-wide;
+}
