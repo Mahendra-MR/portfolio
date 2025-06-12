@@ -7,6 +7,15 @@ export type GitHubRepo = {
   topics: string[];
 };
 
+type GitHubAPIRepo = {
+    name: string;
+    description: string | null;
+    html_url: string;
+    private: boolean;
+    topics?: string[];
+    languages_url: string;
+};
+
 export async function fetchUserRepos(): Promise<GitHubRepo[]> {
   const username = process.env.GITHUB_USERNAME;
   const token = process.env.GITHUB_TOKEN;
@@ -20,7 +29,7 @@ export async function fetchUserRepos(): Promise<GitHubRepo[]> {
     {
       headers: {
         Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github.mercy-preview+json', // for topics
+            Accept: 'application/vnd.github.mercy-preview+json', // needed for topics
       },
       next: { revalidate: 3600 },
     }
@@ -30,12 +39,12 @@ export async function fetchUserRepos(): Promise<GitHubRepo[]> {
     throw new Error(`GitHub API Error: ${repoRes.status}`);
   }
 
-  const repos = await repoRes.json();
+    const repos: GitHubAPIRepo[] = await repoRes.json();
 
   const reposWithLangs = await Promise.all(
     repos
-      .filter((repo: any) => !repo.private)
-      .map(async (repo: any): Promise<GitHubRepo> => {
+          .filter((repo) => !repo.private)
+          .map(async (repo): Promise<GitHubRepo> => {
         let languageString = '';
 
         try {
@@ -47,8 +56,7 @@ export async function fetchUserRepos(): Promise<GitHubRepo[]> {
           });
 
           if (langRes.ok) {
-            const langs = await langRes.json();
-
+              const langs = await langRes.json();
             const total = Object.values(langs as Record<string, number>).reduce(
               (a, b) => a + b,
               0
@@ -61,13 +69,13 @@ export async function fetchUserRepos(): Promise<GitHubRepo[]> {
               })
               .join(', ');
           }
-        } catch (err) {
+        } catch {
           languageString = '';
         }
 
         return {
           name: repo.name,
-          description: repo.description ?? `Stack: ${languageString || 'Not available'}`,
+            description: repo.description ?? `🧠 Stack: ${languageString || 'Not available'}`,
           html_url: repo.html_url,
           topics: repo.topics ?? [],
         };
