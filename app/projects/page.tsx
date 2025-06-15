@@ -1,5 +1,5 @@
 import PageWrapper from '@/lib/PageWrapper';
-import { fetchUserRepos } from '@/lib/github'; // ❌ Removed unused GitHubRepo
+import { fetchUserRepos } from '@/lib/github';
 import Link from 'next/link';
 
 export default async function ProjectsPage() {

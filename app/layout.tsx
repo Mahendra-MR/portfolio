@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Optional: This metadata is used by Next.js for SEO, titles, etc.
+// metadata is used by Next.js for SEO, titles, etc.
 export const metadata = {
   title: 'Mahendra M R | Portfolio',
   description: 'Full-stack Developer',
