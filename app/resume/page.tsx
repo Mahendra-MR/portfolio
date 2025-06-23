@@ -26,23 +26,23 @@ async function fetchStarredProjectsWithReadme() {
     const token = process.env.GITHUB_TOKEN
 
     if (!username || !token) {
-      return []
+        return []
   }
 
     try {
-      const starredRes = await fetch(
-          `https://api.github.com/users/${username}/starred?per_page=100`,
-          {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              Accept: 'application/vnd.github.mercy-preview+json'
-          },
-          next: { revalidate: 3600 }
+        const starredRes = await fetch(
+            `https://api.github.com/users/${username}/starred?per_page=100`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.mercy-preview+json'
+                },
+                next: { revalidate: 3600 }
       }
     )
 
       if (!starredRes.ok) {
-        throw new Error(`GitHub API Error: ${starredRes.status}`)
+          throw new Error(`GitHub API Error: ${starredRes.status}`)
     }
 
       const starredRepos = await starredRes.json()
@@ -54,14 +54,14 @@ async function fetchStarredProjectsWithReadme() {
     const projectsWithReadme = await Promise.all(
         userStarredRepos.map(async (repo): Promise<ProjectWithReadme> => {
             try {
-            const readmeRes = await fetch(
-                `https://api.github.com/repos/${username}/${repo.name}/readme`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    Accept: 'application/vnd.github.v3+json'
-                }
-              }
+                const readmeRes = await fetch(
+                    `https://api.github.com/repos/${username}/${repo.name}/readme`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'application/vnd.github.v3+json'
+                        }
+                    }
           )
 
             if (readmeRes.ok) {
@@ -70,23 +70,23 @@ async function fetchStarredProjectsWithReadme() {
                     description: repo.description || `Featured project: ${repo.name}`,
                     html_url: repo.html_url,
                     topics: repo.topics || [],
-                hasReadme: true
+                    hasReadme: true
             }
           }
-        } catch (error) { }
+        } catch { }
 
           return {
               name: repo.name,
               description: repo.description || `Featured project: ${repo.name}`,
               html_url: repo.html_url,
               topics: repo.topics || [],
-            hasReadme: false
+              hasReadme: false
         }
       })
     )
 
       return projectsWithReadme.filter((project) => project.hasReadme)
-  } catch (error) {
+  } catch {
       return []
   }
 }
@@ -97,7 +97,6 @@ export default async function ResumePage() {
   return (
       <div className="relative min-h-screen bg-black text-white py-20 px-4 sm:px-8">
           <DownloadButton />
-
           <PageWrapper>
               <div className="text-center mb-12">
                   <h1 className="text-5xl font-bold tracking-wide mb-4">Mahendra M R</h1>
