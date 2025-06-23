@@ -47,12 +47,12 @@ export function DownloadButton() {
       download
       className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all"
     >
-      {/* ✅ Desktop: show full button */}
+      {/* Desktop: show full button */}
       <span className="hidden sm:inline-block px-5 py-3 text-sm font-semibold">
         Download PDF
       </span>
 
-      {/* ✅ Mobile: icon only */}
+      {/* Mobile: icon only */}
       <span className="sm:hidden p-3 flex items-center justify-center">
         <Download className="h-5 w-5" />
       </span>
