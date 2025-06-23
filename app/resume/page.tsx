@@ -2,13 +2,11 @@ import PageWrapper from '@/lib/PageWrapper'
 import FadeInSection from '@/lib/FadeInSection'
 import { DownloadButton } from '@/lib/DesignButtons'
 
-type ProjectWithReadme = {
+type Project = {
     name: string
     description: string
     html_url: string
     topics: string[]
-    readmeContent?: string
-    hasReadme: boolean
 }
 
 type GitHubRepo = {
@@ -21,78 +19,70 @@ type GitHubRepo = {
     }
 }
 
-async function fetchStarredProjectsWithReadme() {
+const fallbackProjects: Project[] = [
+    {
+        name: 'Smart Password Manager',
+        html_url: 'https://github.com/mahendra-mr/smart-password-manager',
+        topics: ['fastapi', 'react', 'aes-gcm', 'postgresql', 'docker'],
+        description:
+            'Secure password manager using FastAPI and React with AES-GCM encryption, JWT auth, Dockerized PostgreSQL, and analytics dashboard (in progress).',
+    },
+    {
+        name: 'Legal Assistant Chatbot',
+        html_url: 'https://github.com/mahendra-mr/legal-assistant-chatbot',
+        topics: ['fastapi', 'langchain', 'rag', 'chromadb', 'ollama'],
+        description:
+            'AI-powered legal assistant using local LLMs with LangChain, ChromaDB, and RAG pipeline to process Indian legal documents via FastAPI APIs.',
+    },
+    {
+        name: 'Ethereum Validator Tracker',
+        html_url: 'https://github.com/mahendra-mr/eth-validator-tracker',
+        topics: ['react', 'ethereum', 'beaconcha.in', 'staking'],
+        description:
+            'React-based Ethereum validator stats viewer using beaconcha.in API, showing top validator insights and interactive dashboard UI.',
+    },
+]
+
+async function fetchStarredProjects() {
     const username = process.env.GITHUB_USERNAME
     const token = process.env.GITHUB_TOKEN
 
-    if (!username || !token) {
-        return []
-  }
+    if (!username || !token) return []
 
     try {
-        const starredRes = await fetch(
+        const res = await fetch(
             `https://api.github.com/users/${username}/starred?per_page=100`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    Accept: 'application/vnd.github.mercy-preview+json'
+                    Accept: 'application/vnd.github.mercy-preview+json',
                 },
-                next: { revalidate: 3600 }
+                next: { revalidate: 3600 },
       }
     )
 
-      if (!starredRes.ok) {
-          throw new Error(`GitHub API Error: ${starredRes.status}`)
-    }
+        if (!res.ok) throw new Error(`GitHub API Error: ${res.status}`)
 
-      const starredRepos = await starredRes.json()
+        const starredRepos = (await res.json()) as GitHubRepo[]
 
-      const userStarredRepos = (starredRepos as GitHubRepo[]).filter(
+        const userStarredRepos = starredRepos.filter(
           (repo) => repo.owner.login === username
       )
 
-    const projectsWithReadme = await Promise.all(
-        userStarredRepos.map(async (repo): Promise<ProjectWithReadme> => {
-            try {
-                const readmeRes = await fetch(
-                    `https://api.github.com/repos/${username}/${repo.name}/readme`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            Accept: 'application/vnd.github.v3+json'
-                        }
-                    }
-          )
-
-            if (readmeRes.ok) {
-                return {
-                    name: repo.name,
-                    description: repo.description || `Featured project: ${repo.name}`,
-                    html_url: repo.html_url,
-                    topics: repo.topics || [],
-                    hasReadme: true
-            }
-          }
-        } catch { }
-
-          return {
-              name: repo.name,
-              description: repo.description || `Featured project: ${repo.name}`,
-              html_url: repo.html_url,
-              topics: repo.topics || [],
-              hasReadme: false
-        }
-      })
-    )
-
-      return projectsWithReadme.filter((project) => project.hasReadme)
+        return userStarredRepos.map((repo): Project => ({
+            name: repo.name,
+            description: repo.description || `Featured project: ${repo.name}`,
+            html_url: repo.html_url,
+            topics: repo.topics || [],
+        }))
   } catch {
       return []
   }
 }
 
 export default async function ResumePage() {
-    const starredProjects = await fetchStarredProjectsWithReadme()
+    const starredProjects = await fetchStarredProjects()
+    const projectsToShow = starredProjects.length > 0 ? starredProjects : fallbackProjects
 
   return (
       <div className="relative min-h-screen bg-black text-white py-20 px-4 sm:px-8">
@@ -127,112 +117,86 @@ export default async function ResumePage() {
                       <p className="font-semibold text-lg">Software Engineer – Foundry Digital</p>
                       <p className="text-sm text-gray-400">Bengaluru, India · Oct 2023 – Dec 2024</p>
                       <ul className="list-disc list-inside mt-4 space-y-2 text-gray-300 text-base">
-                          <li>Implemented secure Auth0 authentication for staking systems.</li>
-                          <li>Automated Jira ticketing via &quot;Contact Us&quot; email handler.</li>
-                          <li>Integrated Ethereum APIs for staking workflows.</li>
-                          <li>Generated CSVs from JSON transaction data.</li>
-                          <li>Used Datadog for node monitoring & uptime (99%).</li>
-                          <li>Built scalable tools with NestJS for node ops.</li>
-                          <li>Configured Vault/Nomad/JFrog for containerized node clients (Solana, AVAX, DOT, etc).</li>
+                          <li>Built Node.js (NestJS) tools for blockchain metrics and node performance monitoring, optimizing concurrency and resource usage for high scalability.</li>
+                          <li>Ensured high uptimes (99%) and accurate payouts for staking operations.</li>
+                          <li>Integrated public Ethereum APIs to facilitate seamless Ethereum staking operations.</li>
+                          <li>Automated Jira ticket creation by processing emails received via the "Contact Us" link on the website.</li>
+                          <li>Developed functionality to generate CSV documents from JSON responses which contained transaction history.</li>
+                          <li>Monitored node metrics with Datadog to enhance reliability and operational insight.</li>
+                          <li>Identified and resolved node issues to maintain performance.</li>
+                          <li>Created and managed Vault and Nomad configurations, and JFrog pipelines for dockerizing the node clients (SSV, Obol, Solana, AVAX, Livepeer, NEAR, DOT).</li>
+                          <li>Utilized agile development methodologies with Jira to collaborate effectively across teams and ensure timely feature delivery.</li>
                       </ul>
                   </FadeInSection>
 
                   <FadeInSection>
                       <h2 className="text-2xl font-semibold text-blue-400 mb-4">Skills</h2>
                       <div className="text-base text-gray-300 leading-7">
-                          <p><strong>Languages:</strong> Python, JS, TS, Java, C, SQL, C#, HTML, CSS</p>
-                          <p><strong>Frameworks:</strong> React, Node.js, NestJS, ASP.Net, VB.Net</p>
-                          <p><strong>Tools:</strong> Git, Jira, GitLab, Docker</p>
-                          <p><strong>Domains:</strong> Blockchain, Staking, Bitcoin Mining</p>
+                          <p><strong>Languages:</strong> Python, JavaScript, TypeScript, Java, C, HTML, CSS, SQL, C#</p>
+                          <p><strong>Frameworks & Tools:</strong> React, FastAPI, Node.js, NestJS, Docker, LangChain, ChromaDB, Git, Jira, GitLab, ASP.Net, VB.Net</p>
+                          <p><strong>Domains:</strong> Blockchain Technology, Bitcoin Mining, Staking, Gen AI, RAG, Encryption (AES-GCM)</p>
                       </div>
                   </FadeInSection>
 
                   <FadeInSection>
                       <h2 className="text-2xl font-semibold text-blue-400 mb-6">Featured Projects</h2>
-                      {starredProjects.length > 0 ? (
-                          <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-                              {starredProjects.map((project) => (
-                                  <div
-                                      key={project.name}
-                                      className="bg-white/5 backdrop-blur-md rounded-lg p-5 border border-white/10 hover:border-blue-400/30 transition-all duration-300"
-                                  >
-                                      <div className="flex justify-between items-start mb-3">
-                                          <h3 className="font-semibold text-lg text-white">
-                                              <a
-                                                  href={project.html_url}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="hover:text-blue-400 transition-colors"
+                      <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                          {projectsToShow.map((project) => (
+                              <div
+                                  key={project.name}
+                                  className="bg-white/5 backdrop-blur-md rounded-lg p-5 border border-white/10 hover:border-blue-400/30 transition-all duration-300"
+                              >
+                                  <div className="flex justify-between items-start mb-3">
+                                      <h3 className="font-semibold text-lg text-white">
+                                          <a
+                                              href={project.html_url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="hover:text-blue-400 transition-colors"
+                                          >
+                                              {project.name}
+                                          </a>
+                                      </h3>
+                                      <span className="text-xs bg-yellow-600/30 text-yellow-200 px-2 py-1 rounded-full">
+                                          ⭐ Featured
+                                      </span>
+                                  </div>
+
+                                  <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                                      {project.description}
+                                  </p>
+
+                                  {project.topics && project.topics.length > 0 && (
+                                      <div className="flex flex-wrap gap-2 mb-3">
+                                          {project.topics.slice(0, 4).map((topic: string) => (
+                                              <span
+                                                  key={topic}
+                                                  className="bg-blue-600/20 text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-500/30"
                                               >
-                                                  {project.name}
-                                              </a>
-                                          </h3>
-                                          <span className="text-xs bg-yellow-600/30 text-yellow-200 px-2 py-1 rounded-full">
-                                              ⭐ Featured
-                                          </span>
+                                                  {topic}
+                                              </span>
+                                          ))}
+                                          {project.topics.length > 4 && (
+                                              <span className="text-xs text-gray-400">
+                                                  +{project.topics.length - 4} more
+                                              </span>
+                                          )}
                                       </div>
+                                  )}
 
-                        <p className="text-sm text-gray-300 mb-4 leading-relaxed">
-                            {project.description}
-                        </p>
-
-                        {project.topics && project.topics.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {project.topics.slice(0, 4).map((topic: string) => (
-                                    <span
-                                        key={topic}
-                                        className="bg-blue-600/20 text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-500/30"
-                                    >
-                                        {topic}
-                                    </span>
-                                ))}
-                                {project.topics.length > 4 && (
-                                    <span className="text-xs text-gray-400">
-                                        +{project.topics.length - 4} more
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="flex justify-between items-center">
-                            <a
-                                href={project.html_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
-                            >
-                                View on GitHub →
-                            </a>
-                        </div>
-                    </div>
-                ))}
-                          </div>
-                      ) : (
-                          <div className="text-center py-8">
-                              <p className="text-gray-400 mb-4">No starred projects with README files found.</p>
-                              <p className="text-sm text-gray-500 mb-6">Star your best repositories on GitHub to showcase them here!</p>
-                              <div className="space-y-5 text-base text-gray-300">
-                                  <div>
-                                      <p className="font-semibold">Ethereum Validator Tracker</p>
-                                      <p className="text-sm text-gray-400">
-                                          React UI to visualize validator stats via beaconcha.in API
-                                      </p>
-                                  </div>
-                                  <div>
-                                      <p className="font-semibold">Job Portal Website</p>
-                                      <p className="text-sm text-gray-400">
-                                          ASP.Net + SQL based portal with resume upload and filters
-                                      </p>
-                                  </div>
-                                  <div>
-                                      <p className="font-semibold">Blood Bank Management System</p>
-                                      <p className="text-sm text-gray-400">
-                                          VB.Net + SQL Windows app for donor and stock tracking
-                                      </p>
+                                  <div className="flex justify-between items-center">
+                                      <a
+                                          href={project.html_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+                                      >
+                                          View on GitHub →
+                                      </a>
                                   </div>
                               </div>
-                          </div>
-                      )}
+                          ))}
+                      </div>
                   </FadeInSection>
 
                   <FadeInSection>
