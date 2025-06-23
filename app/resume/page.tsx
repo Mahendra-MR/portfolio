@@ -120,7 +120,7 @@ export default async function ResumePage() {
                           <li>Built Node.js (NestJS) tools for blockchain metrics and node performance monitoring, optimizing concurrency and resource usage for high scalability.</li>
                           <li>Ensured high uptimes (99%) and accurate payouts for staking operations.</li>
                           <li>Integrated public Ethereum APIs to facilitate seamless Ethereum staking operations.</li>
-                          <li>Automated Jira ticket creation by processing emails received via the "Contact Us" link on the website.</li>
+                          <li>Automated Jira ticket creation by processing emails received via the &quot;Contact Us&quot; link on the website.</li>
                           <li>Developed functionality to generate CSV documents from JSON responses which contained transaction history.</li>
                           <li>Monitored node metrics with Datadog to enhance reliability and operational insight.</li>
                           <li>Identified and resolved node issues to maintain performance.</li>
