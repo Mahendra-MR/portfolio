@@ -1,106 +1,104 @@
-import PageWrapper from '@/lib/PageWrapper';
-import FadeInSection from '@/lib/FadeInSection';
-import { DownloadButton } from '@/lib/DesignButtons';
-import { fetchUserRepos } from '@/lib/github';
+import PageWrapper from '@/lib/PageWrapper'
+import FadeInSection from '@/lib/FadeInSection'
+import { DownloadButton } from '@/lib/DesignButtons'
 
-// New type for projects with README
 type ProjectWithReadme = {
-    name: string;
-    description: string;
-    html_url: string;
-    topics: string[];
-    readmeContent?: string;
-    hasReadme: boolean;
-};
+    name: string
+    description: string
+    html_url: string
+    topics: string[]
+    readmeContent?: string
+    hasReadme: boolean
+}
 
-// Function to fetch starred repositories with README files
+type GitHubRepo = {
+    name: string
+    description: string
+    html_url: string
+    topics: string[]
+    owner: {
+        login: string
+    }
+}
+
 async function fetchStarredProjectsWithReadme() {
-    const username = process.env.GITHUB_USERNAME;
-    const token = process.env.GITHUB_TOKEN;
+    const username = process.env.GITHUB_USERNAME
+    const token = process.env.GITHUB_TOKEN
 
     if (!username || !token) {
-      return [];
+      return []
   }
 
     try {
-        // Fetch starred repositories
-        const starredRes = await fetch(
-            `https://api.github.com/users/${username}/starred?per_page=100`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: 'application/vnd.github.mercy-preview+json',
-                },
-                next: { revalidate: 3600 },
-            }
-        );
+      const starredRes = await fetch(
+          `https://api.github.com/users/${username}/starred?per_page=100`,
+          {
+              headers: {
+                  Authorization: `Bearer ${token}`,
+              Accept: 'application/vnd.github.mercy-preview+json'
+          },
+          next: { revalidate: 3600 }
+      }
+    )
 
-        if (!starredRes.ok) {
-            throw new Error(`GitHub API Error: ${starredRes.status}`);
-        }
+      if (!starredRes.ok) {
+        throw new Error(`GitHub API Error: ${starredRes.status}`)
+    }
 
-        const starredRepos = await starredRes.json();
+      const starredRepos = await starredRes.json()
 
-        // Filter to only include repos owned by the user
-        const userStarredRepos = starredRepos.filter((repo: any) =>
-            repo.owner.login === username
-        );
+      const userStarredRepos = (starredRepos as GitHubRepo[]).filter(
+          (repo) => repo.owner.login === username
+      )
 
     const projectsWithReadme = await Promise.all(
-        userStarredRepos.map(async (repo: any): Promise<ProjectWithReadme> => {
+        userStarredRepos.map(async (repo): Promise<ProjectWithReadme> => {
             try {
-                // Check if README exists
-                const readmeRes = await fetch(
-                    `https://api.github.com/repos/${username}/${repo.name}/readme`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            Accept: 'application/vnd.github.v3+json',
-                        },
-                    }
-                );
+            const readmeRes = await fetch(
+                `https://api.github.com/repos/${username}/${repo.name}/readme`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.v3+json'
+                }
+              }
+          )
 
             if (readmeRes.ok) {
-                  return {
-                      name: repo.name,
-                      description: repo.description || `Featured project: ${repo.name}`,
-                      html_url: repo.html_url,
-                      topics: repo.topics || [],
-                      hasReadme: true,
-                  };
-              }
-          } catch (error) {
-              console.warn(`Could not fetch README for ${repo.name}:`, error);
+                return {
+                    name: repo.name,
+                    description: repo.description || `Featured project: ${repo.name}`,
+                    html_url: repo.html_url,
+                    topics: repo.topics || [],
+                hasReadme: true
+            }
           }
+        } catch (error) { }
 
           return {
               name: repo.name,
               description: repo.description || `Featured project: ${repo.name}`,
               html_url: repo.html_url,
               topics: repo.topics || [],
-              hasReadme: false,
-          };
+            hasReadme: false
+        }
       })
-    );
+    )
 
-    // Filter to only include projects with README files
-    return projectsWithReadme.filter(project => project.hasReadme);
+      return projectsWithReadme.filter((project) => project.hasReadme)
   } catch (error) {
-      console.error('Error fetching starred repositories:', error);
-      return [];
+      return []
   }
 }
 
 export default async function ResumePage() {
-    const starredProjects = await fetchStarredProjectsWithReadme();
+    const starredProjects = await fetchStarredProjectsWithReadme()
 
   return (
       <div className="relative min-h-screen bg-black text-white py-20 px-4 sm:px-8">
-          {/* Floating download button (bottom-right corner) */}
           <DownloadButton />
 
           <PageWrapper>
-              {/* Header */}
               <div className="text-center mb-12">
                   <h1 className="text-5xl font-bold tracking-wide mb-4">Mahendra M R</h1>
                   <p className="text-md text-gray-400">
@@ -150,7 +148,6 @@ export default async function ResumePage() {
                       </div>
                   </FadeInSection>
 
-                  {/* Enhanced Projects Section with Starred GitHub Repositories */}
                   <FadeInSection>
                       <h2 className="text-2xl font-semibold text-blue-400 mb-6">Featured Projects</h2>
                       {starredProjects.length > 0 ? (
@@ -162,7 +159,7 @@ export default async function ResumePage() {
                                   >
                                       <div className="flex justify-between items-start mb-3">
                                           <h3 className="font-semibold text-lg text-white">
-                                              <a 
+                                              <a
                                                   href={project.html_url}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
@@ -176,67 +173,65 @@ export default async function ResumePage() {
                                           </span>
                                       </div>
 
-                                      <p className="text-sm text-gray-300 mb-4 leading-relaxed">
-                                          {project.description}
-                                      </p>
+                        <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                            {project.description}
+                        </p>
 
-                                      {/* Technology Tags */}
-                                      {project.topics && project.topics.length > 0 && (
-                                          <div className="flex flex-wrap gap-2 mb-3">
-                                              {project.topics.slice(0, 4).map((topic: string) => (
-                                                  <span
-                                                      key={topic}
-                                                      className="bg-blue-600/20 text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-500/30"
-                                                  >
-                                                      {topic}
-                                                  </span>
-                                              ))}
-                                              {project.topics.length > 4 && (
-                                                  <span className="text-xs text-gray-400">
-                                                      +{project.topics.length - 4} more
-                                                  </span>
-                                              )}
-                                          </div>
-                                      )}
+                        {project.topics && project.topics.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {project.topics.slice(0, 4).map((topic: string) => (
+                                    <span
+                                        key={topic}
+                                        className="bg-blue-600/20 text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-500/30"
+                                    >
+                                        {topic}
+                                    </span>
+                                ))}
+                                {project.topics.length > 4 && (
+                                    <span className="text-xs text-gray-400">
+                                        +{project.topics.length - 4} more
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
-                                      <div className="flex justify-between items-center">
-                                          <a
-                                              href={project.html_url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
-                                          >
-                                              View on GitHub →
-                                          </a>
-                                      </div>
-                                  </div>
-                              ))}
+                        <div className="flex justify-between items-center">
+                            <a
+                                href={project.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+                            >
+                                View on GitHub →
+                            </a>
+                        </div>
+                    </div>
+                ))}
                           </div>
                       ) : (
                           <div className="text-center py-8">
-                                  <p className="text-gray-400 mb-4">No starred projects with README files found.</p>
-                                  <p className="text-sm text-gray-500 mb-6">Star your best repositories on GitHub to showcase them here!</p>
+                              <p className="text-gray-400 mb-4">No starred projects with README files found.</p>
+                              <p className="text-sm text-gray-500 mb-6">Star your best repositories on GitHub to showcase them here!</p>
                               <div className="space-y-5 text-base text-gray-300">
-                                      {/* Fallback to static projects */}
-                                      <div>
-                                          <p className="font-semibold">Ethereum Validator Tracker</p>
-                                          <p className="text-sm text-gray-400">
-                                              React UI to visualize validator stats via beaconcha.in API
-                                          </p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">Job Portal Website</p>
-                                          <p className="text-sm text-gray-400">
-                                              ASP.Net + SQL based portal with resume upload and filters
-                                          </p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">Blood Bank Management System</p>
-                                          <p className="text-sm text-gray-400">
-                                              VB.Net + SQL Windows app for donor and stock tracking
-                                          </p>
-                                      </div>
+                                  <div>
+                                      <p className="font-semibold">Ethereum Validator Tracker</p>
+                                      <p className="text-sm text-gray-400">
+                                          React UI to visualize validator stats via beaconcha.in API
+                                      </p>
                                   </div>
+                                  <div>
+                                      <p className="font-semibold">Job Portal Website</p>
+                                      <p className="text-sm text-gray-400">
+                                          ASP.Net + SQL based portal with resume upload and filters
+                                      </p>
+                                  </div>
+                                  <div>
+                                      <p className="font-semibold">Blood Bank Management System</p>
+                                      <p className="text-sm text-gray-400">
+                                          VB.Net + SQL Windows app for donor and stock tracking
+                                      </p>
+                                  </div>
+                              </div>
                           </div>
                       )}
                   </FadeInSection>
@@ -265,5 +260,5 @@ export default async function ResumePage() {
               </div>
           </PageWrapper>
     </div>
-  );
+  )
 }
