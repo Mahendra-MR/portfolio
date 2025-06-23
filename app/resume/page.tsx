@@ -13,18 +13,41 @@ type ProjectWithReadme = {
     hasReadme: boolean;
 };
 
-// Function to check if repo has README and fetch basic info
-async function fetchProjectsWithReadme() {
-    const repos = await fetchUserRepos();
+// Function to fetch starred repositories with README files
+async function fetchStarredProjectsWithReadme() {
     const username = process.env.GITHUB_USERNAME;
     const token = process.env.GITHUB_TOKEN;
 
     if (!username || !token) {
-        return repos.map(repo => ({ ...repo, hasReadme: false }));
-    }
+      return [];
+  }
+
+    try {
+        // Fetch starred repositories
+        const starredRes = await fetch(
+            `https://api.github.com/users/${username}/starred?per_page=100`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.mercy-preview+json',
+                },
+                next: { revalidate: 3600 },
+            }
+        );
+
+        if (!starredRes.ok) {
+            throw new Error(`GitHub API Error: ${starredRes.status}`);
+        }
+
+        const starredRepos = await starredRes.json();
+
+        // Filter to only include repos owned by the user
+        const userStarredRepos = starredRepos.filter((repo: any) =>
+            repo.owner.login === username
+        );
 
     const projectsWithReadme = await Promise.all(
-        repos.map(async (repo): Promise<ProjectWithReadme> => {
+        userStarredRepos.map(async (repo: any): Promise<ProjectWithReadme> => {
             try {
                 // Check if README exists
                 const readmeRes = await fetch(
@@ -37,23 +60,39 @@ async function fetchProjectsWithReadme() {
                     }
                 );
 
-                if (readmeRes.ok) {
-                    return { ...repo, hasReadme: true };
-                }
-            } catch (error) {
-                console.warn(`Could not fetch README for ${repo.name}:`, error);
-            }
+            if (readmeRes.ok) {
+                  return {
+                      name: repo.name,
+                      description: repo.description || `Featured project: ${repo.name}`,
+                      html_url: repo.html_url,
+                      topics: repo.topics || [],
+                      hasReadme: true,
+                  };
+              }
+          } catch (error) {
+              console.warn(`Could not fetch README for ${repo.name}:`, error);
+          }
 
-            return { ...repo, hasReadme: false };
-        })
+          return {
+              name: repo.name,
+              description: repo.description || `Featured project: ${repo.name}`,
+              html_url: repo.html_url,
+              topics: repo.topics || [],
+              hasReadme: false,
+          };
+      })
     );
 
     // Filter to only include projects with README files
     return projectsWithReadme.filter(project => project.hasReadme);
+  } catch (error) {
+      console.error('Error fetching starred repositories:', error);
+      return [];
+  }
 }
 
 export default async function ResumePage() {
-    const projectsWithReadme = await fetchProjectsWithReadme();
+    const starredProjects = await fetchStarredProjectsWithReadme();
 
   return (
       <div className="relative min-h-screen bg-black text-white py-20 px-4 sm:px-8">
@@ -111,19 +150,19 @@ export default async function ResumePage() {
                       </div>
                   </FadeInSection>
 
-                  {/* Enhanced Projects Section with GitHub Integration */}
+                  {/* Enhanced Projects Section with Starred GitHub Repositories */}
                   <FadeInSection>
-                      <h2 className="text-2xl font-semibold text-blue-400 mb-6">Projects</h2>
-                      {projectsWithReadme.length > 0 ? (
+                      <h2 className="text-2xl font-semibold text-blue-400 mb-6">Featured Projects</h2>
+                      {starredProjects.length > 0 ? (
                           <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-                              {projectsWithReadme.map((project) => (
+                              {starredProjects.map((project) => (
                                   <div
                                       key={project.name}
                                       className="bg-white/5 backdrop-blur-md rounded-lg p-5 border border-white/10 hover:border-blue-400/30 transition-all duration-300"
                                   >
                                       <div className="flex justify-between items-start mb-3">
                                           <h3 className="font-semibold text-lg text-white">
-                                              <a
+                                              <a 
                                                   href={project.html_url}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
@@ -132,8 +171,8 @@ export default async function ResumePage() {
                                                   {project.name}
                                               </a>
                                           </h3>
-                                          <span className="text-xs bg-green-600/30 text-green-200 px-2 py-1 rounded-full">
-                                              📄 README
+                                          <span className="text-xs bg-yellow-600/30 text-yellow-200 px-2 py-1 rounded-full">
+                                              ⭐ Featured
                                           </span>
                                       </div>
 
@@ -142,9 +181,9 @@ export default async function ResumePage() {
                                       </p>
 
                                       {/* Technology Tags */}
-                                      {project.topics.length > 0 && (
+                                      {project.topics && project.topics.length > 0 && (
                                           <div className="flex flex-wrap gap-2 mb-3">
-                                              {project.topics.slice(0, 4).map((topic) => (
+                                              {project.topics.slice(0, 4).map((topic: string) => (
                                                   <span
                                                       key={topic}
                                                       className="bg-blue-600/20 text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-500/30"
@@ -175,9 +214,10 @@ export default async function ResumePage() {
                           </div>
                       ) : (
                           <div className="text-center py-8">
-                              <p className="text-gray-400 mb-4">Loading projects from GitHub...</p>
+                                  <p className="text-gray-400 mb-4">No starred projects with README files found.</p>
+                                  <p className="text-sm text-gray-500 mb-6">Star your best repositories on GitHub to showcase them here!</p>
                               <div className="space-y-5 text-base text-gray-300">
-                                      {/* Fallback to static projects if GitHub fetch fails */}
+                                      {/* Fallback to static projects */}
                                       <div>
                                           <p className="font-semibold">Ethereum Validator Tracker</p>
                                           <p className="text-sm text-gray-400">
