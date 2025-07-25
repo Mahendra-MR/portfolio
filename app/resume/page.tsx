@@ -41,6 +41,13 @@ const fallbackProjects: Project[] = [
         description:
             'React-based Ethereum validator stats viewer using beaconcha.in API, showing top validator insights and interactive dashboard UI.',
     },
+    {
+        name: 'GitHub Repo Viewer',
+        html_url: 'https://github.com/mahendra-mr/github-repo-viewer',
+        topics: ['android', 'kotlin', 'jetpack compose', 'github-api', 'material3', 'fastapi', 'oauth'],
+        description:
+            'An Android app built with Kotlin and Jetpack Compose to explore GitHub profiles using the GitHub API, featuring real-time search, README viewer, OAuth login, and a sleek Material3 UI.',
+    },
 ]
 
 async function fetchStarredProjects() {
