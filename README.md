@@ -59,7 +59,7 @@ npm install
 yarn install
 ```
 
-###3. Set Up Environment Variables
+### 3. Set Up Environment Variables
 
 Create a .env.local file in the root:
 ```bash
